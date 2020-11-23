@@ -54,19 +54,6 @@ class Cliente(Thread):
         turnos.release()
         self.socket.close()
 
-def comprobar(correo):
-    try:
-        comprobacion=False
-        f=open("ficheros/Usuarios.txt","r")
-        for linea in f:
-            print(linea)
-            print(correo)
-            if (linea == correo):
-                comprobacion=True
-        f.close()
-        return comprobacion
-    except:
-        print("Fichero no encontrado")
 
 turnos=Semaphore(2)
 mutex=Lock()
@@ -75,6 +62,15 @@ server.bind(("", 9999))
 server.listen(1)
 Usuarios_conectados=[]
 
+def comprobacion(correo):
+    comp=False
+    f=open("ficheros/Usuarios.txt",'r')
+    for linea in f:
+        dato=linea.split(";")
+        if (dato[0] == correo):
+            comp=True
+    f.close()
+    return comp
     
 # bucle para atender clientes
 while True:
@@ -86,22 +82,27 @@ while True:
         datos=eleccion.split(';')
         tipo=datos[0]
         correo=datos[1]
-        print(tipo)
+        #Se mira se se inicia sesion o se registra
         if(tipo=='I'):
-            comp=comprobar(correo) 
+            #Se mira si coinciden los correos
+            comp=comprobacion(correo)
+            #si coinciden acepta el inicio y sale del bucle
             if(comp):
                 socket_cliente.send("A".encode())
                 break
+            #Si no se sigue en el bucle hasta que se inicie sesion
             else:
                 socket_cliente.send("D".encode())
         else:
-            comp=comprobar(correo)
+            comp=comprobacion(correo)
+            #si coinciden da error
             if(comp):
                 socket_cliente.send("D".encode())
+            #si no coinciden registra el nuevo correo
             else:
                 f=open("ficheros/Usuarios.txt","a")
                 f.write(correo)
-                f.write("\n")
+                f.write(";\n")
                 socket_cliente.send("A".encode())
                 f.close()
     print("Exito")
