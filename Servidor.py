@@ -5,8 +5,8 @@ import os, os.path
 from time import sleep 
 
 class Cliente(Thread):
-    def _init_(self, socket_cliente, datos_cliente, nombre_cliente, palabra):
-        Thread._init_(self)
+    def __init__(self, socket_cliente, datos_cliente, nombre_cliente, palabra):
+        Thread.__init__(self)
         self.socket = socket_cliente
         self.datos = datos_cliente
         self.nombre=nombre_cliente
@@ -54,53 +54,66 @@ class Cliente(Thread):
         turnos.release()
         self.socket.close()
 
-def mostrar_rank():
+def comprobar(correo):
     try:
-        fichero=open("puntuaciones.txt","r")
-        dicc_jug={}
-        for linea in fichero:
-            datos=linea.split(';')
-            jugador=datos[0]
-            puntos=int(datos[1])
-            dicc_jug[jugador]=puntos
-        fichero.close()
-        #Tengo el diccionario, ahora ordeno y muestro
-        for item in sorted(dicc_jug, key=dicc_jug.get,reverse=True):
-                print('{0:12} ==> {1:2d}'.format(item,dicc_jug[item]))
+        comprobacion=False
+        f=open("ficheros/Usuarios.txt","r")
+        for linea in f:
+            print(linea)
+            print(correo)
+            if (linea == correo):
+                comprobacion=True
+        f.close()
+        return comprobacion
     except:
         print("Fichero no encontrado")
 
 turnos=Semaphore(2)
 mutex=Lock()
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(("", 9003))
+server.bind(("", 9999))
 server.listen(1)
-lista_palabras=['internet','programacion','matematicas','fisica','analisis','redes','sistemas','interfaces','servicios','netbeans']
-lista_elegidas=[]
+Usuarios_conectados=[]
 
-#mostramos menu servidor
-print("Menú: ")
-print("1. Jugar.")
-print("2. Mostrar ranking.")
-opcion=int(input("Elige una opción: "))
-if(opcion==1):
-    #eliminamos el fichero de ranking
-    if(os.path.isfile("puntuaciones.txt")):
-        os.remove("puntuaciones.txt")    
-    # bucle para atender clientes
+    
+# bucle para atender clientes
+while True:
+    # Se espera a un cliente
+    socket_cliente, datos_cliente = server.accept()
+    # Se mira si quiere iniciar sesion o registrarse
     while True:
-        # Se espera a un cliente
-        socket_cliente, datos_cliente = server.accept()
-        # Se escribe su informacion
-        nom=socket_cliente.recv(1024).decode()
-        print ("Conectado "+str(datos_cliente))
-        palabra=random.choice(lista_palabras)
-        while (palabra in lista_elegidas):
-            palabra=random.choice(lista_palabras)
-        lista_elegidas.append(palabra)
-        hilo = Cliente(socket_cliente, datos_cliente, nom, palabra)
-        hilo.start()
-elif(opcion==2):
-    mostrar_rank()
-else:
-    print("Se ha elegido otra opción. Saliendo del sistema.")
+        eleccion=socket_cliente.recv(1024).decode()
+        datos=eleccion.split(';')
+        tipo=datos[0]
+        correo=datos[1]
+        print(tipo)
+        if(tipo=='I'):
+            comp=comprobar(correo) 
+            if(comp):
+                socket_cliente.send("A".encode())
+                break
+            else:
+                socket_cliente.send("D".encode())
+        else:
+            comp=comprobar(correo)
+            if(comp):
+                socket_cliente.send("D".encode())
+            else:
+                f=open("ficheros/Usuarios.txt","a")
+                f.write(correo)
+                f.write("\n")
+                socket_cliente.send("A".encode())
+                f.close()
+    print("Exito")
+
+
+
+    # elif(tipos=='R'):
+
+
+    # palabra=random.choice(lista_palabras)
+    # while (palabra in lista_elegidas):
+    #     palabra=random.choice(lista_palabras)
+    # lista_elegidas.append(palabra)
+    # hilo = Cliente(socket_cliente, datos_cliente, nom, palabra)
+    # hilo.start()
