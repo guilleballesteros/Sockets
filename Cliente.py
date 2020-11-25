@@ -3,7 +3,7 @@ import socket
 s = socket.socket()
 s.connect(("localhost", 9999))
 validacion=False
-
+# comprueba si el email es valido
 def comprobarEmail(email):
     comprobacion=False
     if "@" in email:
@@ -14,56 +14,141 @@ def comprobarEmail(email):
     
     return comprobacion
 
-
+correoC=""
 
 while(not validacion):
-    opcion=int(input("Seleccione una accion: 1.(Iniciar Sesion) 2.(Registrar una cuenta nueva): "))
+    opcion=int(input("Seleccione una accion: 1.(Iniciar Sesion) 2.(Registrar una cuenta nueva) 3.(salir): ").strip())
+    # comprueba el tipo de opcion que ha escogido el cliente
     if ( opcion==1):
-        correo=input("Introduzca una direccion de correo: ")
+        correo=input("Introduzca una direccion de correo: ").strip()
+        # si el correo es valido lo envia al servidor esperando respuesta
         if (comprobarEmail(correo)):
             s.send(("I;"+correo).encode())
             respuesta=s.recv(1024).decode()
-            print(respuesta)
-            if(respuesta=="A"):
+            dato=respuesta.split(";")
+            tipo=dato[0]
+            cadena=dato[1]
+            # si la respuesta es afirmativa, sale del bucle, imprime el mensaje y guarda el correo
+            if(tipo=="A"):
                 validacion=True
+                correoC = correo
+                print(cadena)
+                break
             else:
-                print("No se ha podido iniciar sesion, puede que el correo sea incorrdcto.")
+                print(cadena)
         else:
             print("Correo no valido")
     elif( opcion==2):
-        correo=input("Introduzca una direccion de correo: ")
+        correo=input("Introduzca una direccion de correo: ").strip()
+        # si el correo es valido lo envia al servidor y espera respuesta
         if (comprobarEmail(correo)):
             s.send(("R;"+correo).encode())
             respuesta=s.recv(1024).decode()
-            if(respuesta=='A'):
-                print("Correo registrado exisosamente, Inicie sesion o registre un nuevo correo.")
+            # si la respuesta es afirmativa, vuelve a mostrar el menu por si quiere registrar a otro usuario o iniciar sesion
+            if(tipo=='A'):
+                print(cadena)
             else:
-                print("No se ha podido Registrar, puede que el correo ya exista.")
+                print(cadena)
         else:
             print("Correo no valido")
+    # si quiere salir, envia el mensaje al servidor y cierra conexion
+    elif(opcion==3):
+        s.send("S; ".encode())
+        s.close()
+        break
+    # si la opcion no esta entre las esperadas muestra el mensaje
     else:
         print("La opcion elegida no es correcta")
-opcion=s.recv(1024).decode()
-fin_partida=True
-while fin_partida:
-    letra = input("Letra a buscar >> ")
-    s.send(letra.encode())
-    existe=s.recv(1024).decode()
-    if(existe=='s'):
-        print("La letra "+letra+" existe en la palabra.")
+# mientras que el cliente no quiera salir muestra el menu
+while(True):
+    print("1.(Listar competiciones)")
+    print("2.(Inscribir grupo)")
+    print("3.(Mostrar preguntas)")
+    print("4.(Enviar respuesta)")
+    print("5.(Cerrar sesion): ")
+
+    opcion=int(input("Seleccione una opcion: ").strip())
+    # comprueba la opcion que ha elegido el usuario
+    if(opcion==1):
+        s.send("L".encode())
+        print("Listando Competiciones...")
+        competiciones=s.recv(1024).decode()
+    elif(opcion==2):
+        # envia la opcion
+        s.send("I".encode())
+        nombre=input("introduce el nombre del grupo: ").strip()
+        nombre+=";"
+        # concatena con el nombre del grupo el correo del usuario conectado
+        nombre += (correoC+":")
+        num_participantes=0
+        # mientras que no se hayan introducido a todos los integrantes sigue el bucle
+        while(num_participantes<2):
+            correo=input("Introduce el correo de los demas participantes").strip()
+            # comprueba que el email introducido sea valido
+            if(comprobarEmail(correo)):
+                # si es el ultimo correo termina en ;
+                if(num_participantes==1):
+                    nombre+=(correo+";")
+                # si no termina en :
+                else:
+                    nombre+=(correo+":")
+                num_participantes +=1
+            else:
+                print("Correo no valido")
+        print("enviando grupo...")
+        print(nombre)
+        # envia la informacion y espera respuesta
+        s.send(nombre.encode())
+        # divide la respuesta
+        respuesta=s.recv(1024).decode().split(";")
+        tipo=respuesta[0]
+        cadena=respuesta[1]
+        # mira si se ha podido realizar la opcion o no, e informa de ello
+        if (tipo == 'A'):
+            print (cadena)
+        else:
+            print (cadena)
+
+    elif(opcion==3):
+        s.send("M".encode())
+        print("Cerrando Sesion...")
+    elif(opcion==4):
+        s.send("E".encode())
+        print("Cerrando Sesion...")
+    elif(opcion==5):
+        s.send("C".encode())
+        print("Cerrando Sesion...")
     else:
-        print("La letra "+letra+" no existe en la palabra.")
-    datos=s.recv(1024).decode().split(";")
-    oculta=datos[0]
-    intentos=int(datos[1])
-    mensaje=datos[2]
-    palabra=datos[3]
-    print("Palabra: "+oculta)
-    print("Intentos: "+str(6-int(intentos)))
-    if(mensaje=='G'):
-        print("Has ganado la partida en "+str(6-int(intentos))+" intentos. La palabra era "+palabra)
-        fin_partida=False
-    elif (intentos==0):
-        print("Has perdido la partida. La palabra era "+palabra)
-        fin_partida=False
-s.close()
+        print("Opcion no valida")
+
+
+
+
+
+
+
+
+# opcion=s.recv(1024).decode()
+# fin_partida=True
+# while fin_partida:
+#     letra = input("Letra a buscar >> ")
+#     s.send(letra.encode())
+#     existe=s.recv(1024).decode()
+#     if(existe=='s'):
+#         print("La letra "+letra+" existe en la palabra.")
+#     else:
+#         print("La letra "+letra+" no existe en la palabra.")
+#     datos=s.recv(1024).decode().split(";")
+#     oculta=datos[0]
+#     intentos=int(datos[1])
+#     mensaje=datos[2]
+#     palabra=datos[3]
+#     print("Palabra: "+oculta)
+#     print("Intentos: "+str(6-int(intentos)))
+#     if(mensaje=='G'):
+#         print("Has ganado la partida en "+str(6-int(intentos))+" intentos. La palabra era "+palabra)
+#         fin_partida=False
+#     elif (intentos==0):
+#         print("Has perdido la partida. La palabra era "+palabra)
+#         fin_partida=False
+# s.close()
