@@ -198,7 +198,26 @@ while True:
     hilo.start()
 
     
+""" COMPROBACION DE FECHA
+import time 
+from datetime import datetime
 
+def comprobar_fecha(fechacomp):
+    
+    now = datetime.now() 
+    ahora = now.strftime("%d/%m/%y")
+    fecha = time.strptime(ahora,"%d/%m/%y")
+    fecha2 = time.strptime(fechacomp,"%d/%m/%y")
+    print("hoy es "+ahora)
+    if(fecha == fecha2):
+        print("entra")
+    if(fecha < fecha2):
+        print("ya se ha pasado la fecha")
+    if(fecha > fecha2):
+        print("no ha llegado aun la fecha")
+
+comprobar_fecha("24/11/20")
+"""
 
 
     # elif(tipos=='R'):
