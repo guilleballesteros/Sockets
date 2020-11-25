@@ -217,6 +217,18 @@ def comprobar_fecha(fechacomp):
         print("no ha llegado aun la fecha")
 
 comprobar_fecha("24/11/20")
+
+def comprobar_hora(horacomp):
+    
+    now = datetime.now() 
+    ahora = now.strftime("%H:%M:%S")
+    hora = time.strptime(ahora,"%H:%M:%S")
+    horaLimite = time.strptime(horacomp,"%H:%M:%S")
+    print("ahora es "+ahora)
+    if(hora > horaLimite):
+        print("entra")
+    if(hora < horaLimite):
+        print("hora finalizada")
 """
 
 
