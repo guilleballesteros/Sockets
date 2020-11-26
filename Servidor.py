@@ -14,8 +14,8 @@ class Cliente(Thread):
         self.correo=correo
       
     def run(self):
+        global mutex
         while(True):
-            print(self.correo)
             global turnos, mutex
             opcion=self.socket.recv(1024).decode()
             # comprueba el tipo de opcion que ha elegido el cliente
@@ -25,17 +25,21 @@ class Cliente(Thread):
                 for linea in competiciones:
                     compe=linea.split(";")
                     mensaje+=(compe[0]+";"+compe[1]+";"+compe[2]+"-")
-                print(mensaje)
                 self.socket.send(mensaje.encode())
                 grupo = self.socket.recv(1024).decode()
-                print(grupo)
                 # comprueba que los integrantes esten registrados
                 comp = comprobacionGrupo(grupo)
                 if(comp=="C"):
                     self.socket.send("A;Grupo registrado, procedemos a inscribir en la competicion".encode())
+                    datos=grupo.split(";")
+                    contenido=datos[2]
+                    datos.remove(contenido)
+                    final=""
+                    for linea in datos:
+                        final+=(linea+";")
                     mutex.acquire()
                     f = open("ficheros/Grupos.txt",'a')
-                    f.write(grupo+"\n")
+                    f.write(linea+"\n")
                     f.close()
                     nombreG=grupo.split(";")[0]
                     posicion=int(grupo.split(";")[2])
@@ -45,6 +49,7 @@ class Cliente(Thread):
                         self.socket.send("No se ha podido inscribir al grupo".encode())
                     mutex.release()
                 elif(comp=="P"):
+                    mutex.acquire()
                     self.socket.send("A;Ya existe un grupo con ese nombre procedemos a inscribir a la competicion".encode())
                     nombreG=grupo.split(";")[0]
                     posicion=int(grupo.split(";")[2])
@@ -57,7 +62,9 @@ class Cliente(Thread):
                 else:
                     self.socket.send("D; Hay usuarios que no estan registrados")
             elif(opcion=='L'):
-                print("")
+                nombre=self.socket.recv(1024).decode()
+                linea =listarComp(getComp(),nombre)
+                self.socket.send(linea.encode())
             elif(opcion=='M'):
                 print("")
             elif(opcion=='E'):
@@ -67,48 +74,7 @@ class Cliente(Thread):
                 self.socket.close()
                 Usuarios_conectados.remove(self.correo)
                 break
-        
-           
 
-
-
-        # print(self.nombre+" espera turno para jugar.")
-        # turnos.acquire()
-        # print(self.nombre+" ha comenzado a jugar.")
-        # adivina=['*']*len(self.escogida)
-        # while(self.intentos>0 and self.encontrada==False):
-        #     letra=self.socket.recv(1024).decode()
-        #     if(letra in self.escogida):
-        #         self.socket.send("s".encode())
-        #         for i in range(len(self.escogida)):
-        #             if (self.escogida[i]==letra):
-        #                 adivina[i]=letra
-        #     else:
-        #         self.intentos-=1
-        #         self.socket.send("n".encode())
-        #     pal="".join(adivina)
-        #     cadena=pal+";"+str(self.intentos)+";"
-        #     if(self.escogida==pal):
-        #         self.encontrada=True
-        #         cadena+="G;"
-        #         cadena+=self.escogida
-        #     else:
-        #         cadena+="P;"
-        #         cadena+=self.escogida
-        #     sleep(2)
-        #     self.socket.send(cadena.encode())
-        # if(self.encontrada):
-        #     print(self.nombre+" ha ganado la partida. Puntos: "+str(self.intentos))
-        #     mutex.acquire()
-        #     fichero=open("puntuaciones.txt","a")
-        #     fichero.write(self.nombre+";"+str(self.intentos))
-        #     fichero.write("\n")
-        #     fichero.close()
-        #     mutex.release()
-        # else:
-        #     print(self.nombre+" ha perdido la partida. Puntos: "+str(self.intentos))
-        # turnos.release()
-        # self.socket.close()
 
 # def comprobacionRep(dato):
 #     comp = True
@@ -154,17 +120,32 @@ def inscribir_competicion(grupo, competiciones, posicion):
     comp=False
     f=open("ficheros/Competiciones.txt",'w')
     competicion=competiciones[posicion]
-    print(competicion)
     competicionF = competicion.split(";")
     fechaI=competicionF[1]
     fechaF=competicionF[3]
     print(fechaI+" "+fechaF )
     if(comprobar_fecha(fechaI, fechaF)):
         comp=True
-        competicion+=(grupo+";")
-        competiciones[posicion]=competicion
-        for i in competiciones:
-            f.write(competicion+"\n")
+        print(competicion)
+        competicion = competicion.split(";")
+        print(competicion)
+        competicion[5]+=(grupo+":")
+        # competicion.remove("\n")
+        final=""
+        cont=0
+        for a in competicion:
+            if (cont==(len(competicion)-1)):
+                final+=(a)
+            else:
+                final+=(a+";")
+            cont+=1
+        competiciones[posicion]=final
+        for linea in competiciones:
+            print(linea)
+            f.write(linea)
+    else:
+        for linea in competiciones:
+            f.write(linea)
     f.close()
     return comp
 
@@ -179,7 +160,7 @@ def comprobar_fecha(fechaini,fechafin):
     fechaInicio = time.strptime(fechaini,"%d/%m/%y")
     fechaFinal = time.strptime(fechafin,"%d/%m/%y")
 
-    if(fechaInicio <= fechaActual):
+    if(fechaInicio >= fechaActual):
         if(fechaActual <= fechaFinal):
             return True
         else:
@@ -237,28 +218,24 @@ def getComp():
     print (competiciones)
     return competiciones
 
-def listarComp1(competiciones,grupo):
-    compFinal=[]
-    for linea in competiciones:
-        dato=linea.split(";")
-        if(len(dato<4)):
-            compFinal.append(linea)
-        else:
-            grupos=dato[3].split(":")
-            if (grupo not in grupos):
-                compFinal.append(linea)
-    return compFinal
 
-def listarComp2(competiciones,grupo):
-    compFinal=[]
+
+def listarComp(competiciones,grupo):
+    compFinal=""
     for linea in competiciones:
         dato=linea.split(";")
-        if(len(dato<4)):
-            compFinal.append(linea)
-        else:
-            grupos=dato[3].split(":")
-            if (grupo in grupos):
-                compFinal.append(linea+" * ")
+        fechaIni=dato[1]
+        fechaFin=dato[3]
+        final="Nombre= "+dato[0]+" Fecha de inicio= "+fechaIni+" Fecha de fin= "+fechaFin
+        grupos=dato[5].split(":")    
+        if (grupo in grupos):
+            final+=" *"
+        comp=comprobar_fecha(fechaIni,fechaFin)
+        if(comp):
+            final+=" <-"
+        if(not comp):
+            final+=" x"
+        compFinal+=final+"|"
             
     return compFinal
 

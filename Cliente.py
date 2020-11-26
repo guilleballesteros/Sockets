@@ -27,9 +27,12 @@ def menu(correoC):
         # comprueba la opcion que ha elegido el usuario
         if(opcion==1):
             s.send("L".encode())
+            nombre=input("Introduce el nombre del grupo: ")
+            s.send(nombre.encode())
             print("Listando Competiciones...")
-            competiciones=s.recv(1024).decode()
-            print(competiciones)
+            competiciones=(s.recv(1024).decode()).split("|")
+            for linea in competiciones:
+                print(linea)
         elif(opcion==2):
             # envia la opcion
             s.send("I".encode())
