@@ -136,6 +136,25 @@ class Cliente(Thread):
 #                 comp=False
 #     return comp
 
+def puntuacion(pre,ele):
+    global punt
+    global res
+    if(pre==0):
+        if(respuestas[int(pre)]==ele):
+            punt+=1
+            return punt
+        else:
+            punt-=0.25
+            return punt
+    else:
+        if(respuestas[int(pre*3)]==ele):
+            punt+=1
+            return punt
+        else:
+            punt-=0.25
+            return punt
+
+
 def comprobacionGrupo(dato):
     comp = "C"
     datos=dato.split(";")
