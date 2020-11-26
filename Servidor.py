@@ -74,7 +74,7 @@ class Cliente(Thread):
                         if(x<10):
                             mandar= mandar+"Pregunta "+str(x+1)+" "+pregunta[x]+"\n"
                     self.socket.send(mandar.encode())    
-           elif(opcion=='E'): #Responder una pregunta
+            elif(opcion=='E'): #Responder una pregunta
                  global res
                  self.socket.send("Que pregunta quieres responder? ".encode())
                  y = int(self.socket.recv(1024).decode())-1
@@ -212,7 +212,7 @@ def comprobar_hora(horaini, horafin):
     else:
         return False
     
-   def comprobar_fecha2(fechaini,fechafin):
+def comprobar_fecha2(fechaini,fechafin):
     
     now = datetime.now() 
     ahora = now.strftime("%d/%m/%y")

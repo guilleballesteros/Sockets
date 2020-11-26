@@ -91,35 +91,35 @@ def menu(correoC):
             else:
                 print (cadena)
         elif(opcion==3):
-        s.send("M".encode())
-        #Vemos si puede entrar en la competicion
-        entrar=s.recv(1024).decode()
-        if(entrar=="entra"):
-            #Si entra mandamos todas las preguntas
-            preguntas=s.recv(1024).decode()
-            print(preguntas)
+            s.send("M".encode())
+            #Vemos si puede entrar en la competicion
+            entrar=s.recv(1024).decode()
+            if(entrar=="entra"):
+                #Si entra mandamos todas las preguntas
+                preguntas=s.recv(1024).decode()
+                print(preguntas)
 
-    elif(opcion==4):
-        s.send("E".encode())
-        pregunt=s.recv(1024).decode()
-        selecPre = input(pregunt)
-        s.send(selecPre.encode())
-        pregunta=s.recv(1024).decode()
-        if(pregunta.split(";")[0]=="FF"):
-            print("Porfavor seleccione una respuesta que no este respondida")
-        else:
-            print(pregunta) 
-            opciones=s.recv(1024).decode()
-            continuar=True
-            while(continuar):
-                print(opciones)
-                # print("Seleccione una opcion 1 2 3 ")
-                numPre= input("Seleccione una opcion 1 2 3 ")
-                if(int(numPre)<=3):
-                    s.send(numPre.encode())
-                    continuar=False
-                else:
-                    print("Solucion incorrecta, por favor poner solo 1, 2 o 3")
+        elif(opcion==4):
+            s.send("E".encode())
+            pregunt=s.recv(1024).decode()
+            selecPre = input(pregunt)
+            s.send(selecPre.encode())
+            pregunta=s.recv(1024).decode()
+            if(pregunta.split(";")[0]=="FF"):
+                print("Porfavor seleccione una respuesta que no este respondida")
+            else:
+                print(pregunta) 
+                opciones=s.recv(1024).decode()
+                continuar=True
+                while(continuar):
+                    print(opciones)
+                    # print("Seleccione una opcion 1 2 3 ")
+                    numPre= input("Seleccione una opcion 1 2 3 ")
+                    if(int(numPre)<=3):
+                        s.send(numPre.encode())
+                        continuar=False
+                    else:
+                        print("Solucion incorrecta, por favor poner solo 1, 2 o 3")
         
         elif(opcion==5):
             s.send("C".encode())
