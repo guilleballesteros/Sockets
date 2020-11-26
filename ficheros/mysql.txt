@@ -1,0 +1,11 @@
+Que función utiliza para obtener la hora actual en mysql:Time();getTime();NOW()
+Que valor sera devuelto a partir de la siguiente consulta? "Select * from employees order by emp_name desc";Muestra la tabla completa ordenada de mayor a menor;Muestra los id de los empleados de mayor a menor;Muestra la tabla completa ordenada de menor a mayor
+Que enunciado SQL se utiliza para insertar nuevos datos en una base de datos;INSERT INTO;INSERT NEW;ADD
+Un valor NULL se trata como un espacio en blanco o 0,Verdadero;Falso;No sirve la setencia NULL
+En una clave primaria se permiten los valores nulos;Falso;Verdadero;Si se lo indicas con NULL si
+Cual de los siguientes comandos se deben utilizar para crear una base de datos denominada "estudiante";CREATE DATABASE student;DATABSE student;CREATE ?I student
+MySQL es;Un sistema de gestión de bases de datos relacionales;Una base de datos;Un lenguaje de programación
+En una cláusula LIKE, como se puede pedir cualquier valor que terminan en "QPT" por escrito;LIKE %qpt%;LIKE %qpt;LIKE *qpt
+Cual de los siguientes comandos se utiliza para eliminar toda la base de datos MySQL;mysql_drop_database;mysql_drop_table;mysql_drop_entiredb
+Para usar MySQL en el equipo, ¿que necesita?;Una especie de programa de cliente para acceder a las bases de datos;HTML, PHP o Java;Un navegador
+
