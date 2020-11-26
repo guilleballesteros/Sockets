@@ -33,8 +33,8 @@ def menu(correoC):
         elif(opcion==2):
             # envia la opcion
             s.send("I".encode())
+            competiciones=s.recv(1024).decode()
             nombre=input("introduce el nombre del grupo: ").strip()
-            competiciones = s.recv(1024).decode()
             nombre+=";"
             # concatena con el nombre del grupo el correo del usuario conectado
             nombre += (correoC+":")
@@ -55,15 +55,22 @@ def menu(correoC):
                     print("Correo no valido")
             while(True):
                 cont=0
-                for linea in competiciones:
-                    print(cont+" = "+linea)
-                    cont +=1
+                compe=competiciones.split("-")
+                print (compe)
+                con=0
+                for linea in compe:
+                    if( not con==(len(compe)-1)):
+                        datos=linea.split(";")
+                        print(datos)
+                        mostrar=datos[0]+" Hora de inicio: "+datos[1]+" "+datos[2]
+                        print(str(cont)+" = "+mostrar)
+                        cont +=1
+                    con+=1
                 inscribir=int(input("Elige una opcion: ").strip())
                 if(inscribir>=len(competiciones) or inscribir < 0):
                     print("Dicha competicion no existe")
                 else:
-                    nombreComp=linea.split(";")[0]
-                    nombre+=nombreComp+";"
+                    nombre+=str(inscribir)+";"
                     break
             s.send(nombre.encode())
             print("enviando datos...")
