@@ -1,0 +1,10 @@
+Que hace el intérprete de Python;interpreta las órdenes de Python para que el ordenador las entienda;traduce Python para que pueda ser leído en inglés;traduce cualquier lenguaje de programación a Python
+Que es Python;un lenguaje de programación;un intérprete de lenguajes;un programa
+Que hara la orden numero=random.randint(a,b); crea una variable numero que almacena un número al azar que estará entre a y b;crea una variable numero que almacenará un número al azar que puede ser a o b;crea una variable número en la que se almacenan los números a y b;
+Como se llama cuando definimos el valor que va a tener una variable (Por ejemplo: variable=5);asignación de variable;declaración de variable;establecer la variable
+Que salida me dara esta instrucción >>>5+;SyntaxError: invalid syntax;5+;5
+Que orden debo ejecutar para transformar un texto en entero;variable=int(variable);variable=(int.variable);variable=str(variable)
+Si voy a hacer un programa que requiera el empleo de azar, que sentencia debo escribir al comienzo;import random;random;random.randint(x,y)
+Como se llama el interprete de Python que empleamos;Shell;Interpreter;Python 3
+Que orden abre un bucle;while (condicion);if(condicion) else(condicion);if (condición)
+Con que instrucciones se crea una funcion;def nombreFunción();def function: nomeFunción();nombreFunción()= def function
