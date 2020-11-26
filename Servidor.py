@@ -29,20 +29,30 @@ class Cliente(Thread):
                 self.socket.send(mensaje.encode())
                 grupo = self.socket.recv(1024).decode()
                 print(grupo)
-                # coprueba que no haya integrantes registrados en otro grupo
                 # comprueba que los integrantes esten registrados
                 comp = comprobacionGrupo(grupo)
                 if(comp=="C"):
+                    self.socket.send("A;Grupo registrado, procedemos a inscribir en la competicion".encode())
                     mutex.acquire()
                     f = open("ficheros/Grupos.txt",'a')
                     f.write(grupo+"\n")
-                    self.socket.send("A;Grupo registrado, procedemos a inscribir en la competicion".encode())
                     f.close()
+                    nombreG=grupo.split(";")[0]
+                    posicion=int(grupo.split(";")[2])
+                    if(inscribir_competicion(nombreG,competiciones,posicion)):
+                        self.socket.send("Grupo inscrito".encode())
+                    else:
+                        self.socket.send("No se ha podido inscribir al grupo".encode())
                     mutex.release()
                 elif(comp=="P"):
                     self.socket.send("A;Ya existe un grupo con ese nombre procedemos a inscribir a la competicion".encode())
-                    competicion=competiciones[int(grupo.split(";")[2])]
-                    print (competicion)
+                    nombreG=grupo.split(";")[0]
+                    posicion=int(grupo.split(";")[2])
+                    if(inscribir_competicion(nombreG,competiciones,posicion)):
+                        self.socket.send("Grupo inscrito".encode())
+                    else:
+                        self.socket.send("No se ha podido inscribir al grupo".encode())
+                    mutex.release()
 
                 else:
                     self.socket.send("D; Hay usuarios que no estan registrados")
@@ -120,12 +130,9 @@ def comprobacionGrupo(dato):
     comp = "C"
     datos=dato.split(";")
     nombre=datos[0]
-    print(nombre)
     grupo=datos[1]
-    print(grupo)
     integrantes=grupo.split(":")
     f=open("ficheros/Grupos.txt",'r')
-    print (comp)
     # # compprueba que el fichero este vacio o no
     # if(f.read() == ''):
     #     comp= "C"
@@ -134,8 +141,6 @@ def comprobacionGrupo(dato):
     for linea in f:
         datoG=linea.split(";")
         nombreG=datoG[0]
-        print(nombre)
-        print(nombreG)
         if(nombre!=nombreG):
             for integrante in integrantes:
                 if ( not comprobacionCorreo(integrante) ):
@@ -146,38 +151,59 @@ def comprobacionGrupo(dato):
     return comp
 
 def inscribir_competicion(grupo, competiciones, posicion):
+    comp=False
     f=open("ficheros/Competiciones.txt",'w')
     competicion=competiciones[posicion]
-    competicion = competicion.split(";")
-    fechaI=competicion[1]
-    fechaF=competicion[2]
+    print(competicion)
+    competicionF = competicion.split(";")
+    fechaI=competicionF[1]
+    fechaF=competicionF[3]
+    print(fechaI+" "+fechaF )
+    if(comprobar_fecha(fechaI, fechaF)):
+        comp=True
+        competicion+=(grupo+";")
+        competiciones[posicion]=competicion
+        for i in competiciones:
+            f.write(competicion+"\n")
+    f.close()
+    return comp
 
 
-def comprobar_fecha(fechacomp):
+
+def comprobar_fecha(fechaini,fechafin):
+    
     now = datetime.now() 
     ahora = now.strftime("%d/%m/%y")
-    fecha = time.strptime(ahora,"%d/%m/%y")
-    fecha2 = time.strptime(fechacomp,"%d/%m/%y")
-    print("hoy es "+ahora)
-    if(fecha == fecha2):
-        print("entra")
-    if(fecha < fecha2):
-        print("ya se ha pasado la fecha")
-    if(fecha > fecha2):
-        print("no ha llegado aun la fecha")
 
+    fechaActual = time.strptime(ahora,"%d/%m/%y")
+    fechaInicio = time.strptime(fechaini,"%d/%m/%y")
+    fechaFinal = time.strptime(fechafin,"%d/%m/%y")
 
-def comprobar_hora(horacomp):
+    if(fechaInicio <= fechaActual):
+        if(fechaActual <= fechaFinal):
+            return True
+        else:
+            return False
+    else:
+        return False
+        
+
+def comprobar_hora(horaini, horafin):
     
     now = datetime.now() 
     ahora = now.strftime("%H:%M:%S")
-    hora = time.strptime(ahora,"%H:%M:%S")
-    horaLimite = time.strptime(horacomp,"%H:%M:%S")
-    print("ahora es "+ahora)
-    if(hora > horaLimite):
-        print("entra")
-    if(hora < horaLimite):
-        print("hora finalizada")
+    horaActual = time.strptime(ahora,"%H:%M:%S")
+    horaInicio = time.strptime(horaini,"%H:%M:%S")
+    horaFinal = time.strptime(horafin,"%H:%M:%S")
+
+    if(horaInicio <= horaActual):
+        if(horaActual <= horaFinal):
+            return True
+        else:
+            return False
+    else:
+        return False
+
 
         
 # comprueba si hay algun usuario con el mismo nombre en el fichero

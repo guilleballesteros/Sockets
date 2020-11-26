@@ -84,6 +84,7 @@ def menu(correoC):
             # mira si se ha podido realizar la opcion o no, e informa de ello
             if (tipo == 'A'):
                 print (cadena)
+                print(s.recv(1024).decode())
             else:
                 print (cadena)
         elif(opcion==3):
