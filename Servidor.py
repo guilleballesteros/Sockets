@@ -9,7 +9,7 @@ import random
 
 
 try :
-    fichero=open("preguntas.txt","r")
+    fichero=open("ficheros/preguntas.txt","r")
     respuestas=[]
     pregunta=[]
     for linea in fichero:
@@ -31,7 +31,6 @@ class Cliente(Thread):
         self.correo=correo
       
     def run(self):
-        global mutex
         while(True):
             global turnos, mutex
             opcion=self.socket.recv(1024).decode()
