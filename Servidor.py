@@ -5,6 +5,23 @@ import os, os.path
 from time import sleep 
 import time 
 from datetime import datetime
+import random
+
+
+try :
+    fichero=open("preguntas.txt","r")
+    respuestas=[]
+    pregunta=[]
+    for linea in fichero:
+        datos=linea.split(";")
+        pregunta+=datos[0],
+        respuestas+=datos[1],datos[2],datos[3]
+    fichero.close()   
+except:
+    print("fichero no encontrado") 
+
+res=[]
+punt=0
 
 class Cliente(Thread):
     def __init__(self, socket_cliente, datos_cliente, correo):
