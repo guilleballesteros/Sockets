@@ -76,7 +76,7 @@ class Cliente(Thread):
                     mutex.release()
 
                 else:
-                    self.socket.send("D; Hay usuarios que no estan registrados")
+                    self.socket.send("D; No es posible Realizar el registo, puede que no algun integrante no este registrado o forme parte de otro grupo".encode())
             elif(opcion=='L'):
                 nombre=self.socket.recv(1024).decode()
                 linea =listarComp(getComp(),nombre)
@@ -119,21 +119,20 @@ class Cliente(Thread):
                 break
 
 
-# def comprobacionRep(dato):
-#     comp = True
-#     datos=dato.split(";")
-#     grupo=datos[1]
-#     integrantes=grupo.split(":")
-#     f=open("ficheros/Grupos.txt",'r')
-#     print (comp)
-#     # recorre el fichero y comprueba que no haya integrantes en otro grupo registrado
-#     for linea in f:
-#         datostxt=linea.split(";")
-#         grupotxt=datostxt[1].split(":")
-#         for integrante in integrantes:
-#             if(integrante in grupotxt):
-#                 comp=False
-#     return comp
+def comprobacionRep(dato):
+    comp = True
+    datos=dato.split(";")
+    grupo=datos[1]
+    integrantes=grupo.split(":")
+    f=open("ficheros/Grupos.txt",'r')
+    # recorre el fichero y comprueba que no haya integrantes en otro grupo registrado
+    for linea in f:
+        datostxt=linea.split(";")
+        grupotxt=datostxt[1].split(":")
+        for integrante in integrantes:
+            if(integrante in grupotxt):
+                comp=False
+    return comp
 
 def puntuacion(pre,ele):
     global punt
@@ -161,18 +160,16 @@ def comprobacionGrupo(dato):
     grupo=datos[1]
     integrantes=grupo.split(":")
     f=open("ficheros/Grupos.txt",'r')
-    # # compprueba que el fichero este vacio o no
-    # if(f.read() == ''):
-    #     comp= "C"
-    # else:
-        # recorre el fichero y compprueba que esten registrados y que el nombre no coincida
     for linea in f:
         datoG=linea.split(";")
         nombreG=datoG[0]
         if(nombre!=nombreG):
-            for integrante in integrantes:
-                if ( not comprobacionCorreo(integrante) ):
-                    return "D"
+            if(comprobacionRep(dato)):
+                for integrante in integrantes:
+                    if ( not comprobacionCorreo(integrante) ):
+                        return "D"
+            else:
+                return "D"
         else:
             comp="P"
     f.close()

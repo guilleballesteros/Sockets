@@ -44,7 +44,7 @@ def menu(correoC):
             num_participantes=0
             # mientras que no se hayan introducido a todos los integrantes sigue el bucle
             while(num_participantes<2):
-                correo=input("Introduce el correo de los demas participantes").strip()
+                correo=input("Introduce el correo de los demas participantes: ").strip()
                 # comprueba que el email introducido sea valido
                 if(comprobarEmail(correo)):
                     # si es el ultimo correo termina en ;
@@ -77,7 +77,6 @@ def menu(correoC):
                     break
             s.send(nombre.encode())
             print("enviando datos...")
-            print(nombre)
             # envia la informacion y espera respuesta
             s.send(nombre.encode())
             # divide la respuesta
