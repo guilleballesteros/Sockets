@@ -186,7 +186,6 @@ def comprobar_hora(horaini, horafin):
         return False
 
 
-        
 # comprueba si hay algun usuario con el mismo nombre en el fichero
 def comprobacionCorreo(correo):
     comp=False
