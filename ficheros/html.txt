@@ -1,0 +1,10 @@
+Que formato tienen las paginas HTML;Son ficheros de texto. Podemos leer su contenido con cualquier procesador de texto;Son ficheros de texto especiales. Solo pueden leerlos los navegadores;Son ficheros binarios compilados
+Cual es la version actualmente vigente del estándar HTML;HTML 5;HTML 4;HTML 6
+Cual es la estructura de una página Web;<!DOCTYPE html> <html> <head>.....</head> <body>.....</body> </html>;<!DOCTYPE html> <head>.....</head> <body>....</body> <footer>.....</footer>;<!DOCTYPE html> <body> <head>.....</head> <html>.....</html> </body>
+Cual de estas etiquetas ayudaria a que los acentos se vieran bien en una página web;<meta charset="UTF-8">;<meta ASCII="yes">;<accentuation="on">
+Como se etiqueta un párrafo en HTML;<p>Esto es un párrafo.</p>;<p>Esto es un párrafo.<p>;<p="Esto es un párrafo">
+Para que se usa el atributo ‘src’ en algunos elementos de HTML;Para indicar la ubicación de un recurso, como una página, una imagen o un video;Se usa en etiquetas de texto para indicar la tipografía (fuente) que se usa;El atributo 'src' no existe en HTML
+La etiqueta <em> da énfasis al texto que encierra, por defecto se representa; como cursiva;como redonda;como negrita
+La etiqueta <title> se escribe; dentro del <head>;dentro del <body>;antes del <head>
+La etiqueta <th> representa;Una celda que es cabecera de la tabla;Una celda de la tabla; Una celda importante de la tabla
+Las listas de informacion no ordenadas se identifican con la etiqueta;<di>;<ul>;<ol>
