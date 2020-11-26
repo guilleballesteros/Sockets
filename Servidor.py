@@ -3,6 +3,8 @@ import socket
 import random
 import os, os.path
 from time import sleep 
+import time 
+from datetime import datetime
 
 class Cliente(Thread):
     def __init__(self, socket_cliente, datos_cliente, correo):
@@ -18,19 +20,24 @@ class Cliente(Thread):
             opcion=self.socket.recv(1024).decode()
             # comprueba el tipo de opcion que ha elegido el cliente
             if(opcion=='I'):
+                competiciones=getComp()
+                self.socket.send()
                 grupo = self.socket.recv(1024).decode()
                 # coprueba que no haya integrantes registrados en otro grupo
                 if(comprobacionRep(grupo)):
                     # comprueba que los integrantes esten registrados
-                    if(comprobacionGrupo(grupo)):
+                    comp = comprobacionGrupo(grupo)
+                    if(comp=="C"):
                         mutex.acquire()
                         f = open("ficheros/Grupos.txt",'a')
                         f.write(grupo+"\n")
                         self.socket.send("A;Grupo registrado".encode())
                         f.close()
                         mutex.release()
+                    elif(comp=="P"):
+                        self.socket.send("A;Ya existe un grupo con ese nombre procedemos a inscribir a la competicion".encode())
                     else:
-                        self.socket.send("D;Ya existe un grupo con ese nombre o no estan todos los usuarios registrados".encode())
+                        self.socket.send("D; Hay usuarios que no estan registrados")
                 else:
                     self.socket.send("D; ya hay un grupo con 1 o más de estos integrantes registrados".encode())
             elif(opcion=='L'):
@@ -104,31 +111,59 @@ def comprobacionRep(dato):
     return comp
 
 def comprobacionGrupo(dato):
-    comp = False
+    comp = "C"
     datos=dato.split(";")
     nombre=datos[0]
     grupo=datos[1]
     integrantes=grupo.split(":")
     f=open("ficheros/Grupos.txt",'r')
     print (comp)
-    # comprueba que el fichero este vacio o no
-    if(f.read() == ''):
-        comp= True
-    else:
+    # # comprueba que el fichero este vacio o no
+    # if(f.read() == ''):
+    #     comp= "C"
+    # else:
         # recorre el fichero y comprueba que esten registrados y que el nombre no coincida
-        for linea in f:
-            datoG=linea.split(";")
-            nombreG=datoG[0]
-            print(nombre)
-            print(nombreG)
-            if(nombre!=nombreG):
-                for integrante in integrantes:
-                    comp = comprobacionCorreo(integrante)
-                    if ( not comp ):
-                        return False
+    for linea in f:
+        datoG=linea.split(";")
+        nombreG=datoG[0]
+        print(nombre)
+        print(nombreG)
+        if(nombre!=nombreG):
+            for integrante in integrantes:
+                comp = comprobacionCorreo(integrante)
+                if ( not comp ):
+                    return "D"
+        else:
+            comp="P"
     f.close()
     return comp
 
+def comprobar_fecha(fechacomp):
+    
+    now = datetime.now() 
+    ahora = now.strftime("%d/%m/%y")
+    fecha = time.strptime(ahora,"%d/%m/%y")
+    fecha2 = time.strptime(fechacomp,"%d/%m/%y")
+    print("hoy es "+ahora)
+    if(fecha == fecha2):
+        print("entra")
+    if(fecha < fecha2):
+        print("ya se ha pasado la fecha")
+    if(fecha > fecha2):
+        print("no ha llegado aun la fecha")
+
+
+def comprobar_hora(horacomp):
+    
+    now = datetime.now() 
+    ahora = now.strftime("%H:%M:%S")
+    hora = time.strptime(ahora,"%H:%M:%S")
+    horaLimite = time.strptime(horacomp,"%H:%M:%S")
+    print("ahora es "+ahora)
+    if(hora > horaLimite):
+        print("entra")
+    if(hora < horaLimite):
+        print("hora finalizada")
 
         
 # comprueba si hay algun usuario con el mismo nombre en el fichero
@@ -151,14 +186,52 @@ server.bind(("", 9999))
 server.listen(1)
 Usuarios_conectados=[]
 
+def inicio(socket_cliente,datos_cliente,correo):
+    hilo=Cliente(socket_cliente,datos_cliente, correo)
+    hilo.start()
 
-    
+def getComp():
+    f=open("ficheros/Competiciones.txt")
+    competiciones=[]
+    for linea in f:
+        competiciones.append(linea)
+    f.close()
+    return linea
+
+def listarComp1(competiciones,grupo):
+    compFinal=[]
+    for linea in competiciones:
+        dato=linea.split(";")
+        if(len(dato<4)):
+            compFinal.append(linea)
+        else:
+            grupos=dato[3].split(":")
+            if (grupo not in grupos):
+                compFinal.append(linea)
+    return compFinal
+
+def listarComp2(competiciones,grupo):
+    compFinal=[]
+    for linea in competiciones:
+        dato=linea.split(";")
+        if(len(dato<4)):
+            compFinal.append(linea)
+        else:
+            grupos=dato[3].split(":")
+            if (grupo in grupos):
+                compFinal.append(linea+" * ")
+            
+    return compFinal
+
+
+
+
 # bucle para atender clientes
 while True:
     # Se espera a un cliente
     socket_cliente, datos_cliente = server.accept()
     # Se mira si quiere iniciar sesion o registrarse
-    while True:
+    while (True):
         eleccion=socket_cliente.recv(1024).decode()
         datos=eleccion.split(';')
         tipo=datos[0]
@@ -174,6 +247,7 @@ while True:
                 else:
                     socket_cliente.send("A; has iniciado sesion ".encode())
                     Usuarios_conectados.append(correo)
+                    inicio(socket_cliente,datos_cliente,correo)
                     break
             #Si no se sigue en el bucle hasta que se inicie sesion
             else:
@@ -194,42 +268,13 @@ while True:
         else:
             socket_cliente.close()
             break
-    hilo=Cliente(socket_cliente,datos_cliente, correo)
-    hilo.start()
+    
 
     
-""" COMPROBACION DE FECHA
-import time 
-from datetime import datetime
 
-def comprobar_fecha(fechacomp):
-    
-    now = datetime.now() 
-    ahora = now.strftime("%d/%m/%y")
-    fecha = time.strptime(ahora,"%d/%m/%y")
-    fecha2 = time.strptime(fechacomp,"%d/%m/%y")
-    print("hoy es "+ahora)
-    if(fecha == fecha2):
-        print("entra")
-    if(fecha < fecha2):
-        print("ya se ha pasado la fecha")
-    if(fecha > fecha2):
-        print("no ha llegado aun la fecha")
 
-comprobar_fecha("24/11/20")
 
-def comprobar_hora(horacomp):
-    
-    now = datetime.now() 
-    ahora = now.strftime("%H:%M:%S")
-    hora = time.strptime(ahora,"%H:%M:%S")
-    horaLimite = time.strptime(horacomp,"%H:%M:%S")
-    print("ahora es "+ahora)
-    if(hora > horaLimite):
-        print("entra")
-    if(hora < horaLimite):
-        print("hora finalizada")
-"""
+
 
 
     # elif(tipos=='R'):

@@ -14,6 +14,85 @@ def comprobarEmail(email):
     
     return comprobacion
 
+
+def menu(correoC):
+    while(True):
+        print("1.(Listar competiciones)")
+        print("2.(Inscribir grupo)")
+        print("3.(Mostrar preguntas)")
+        print("4.(Enviar respuesta)")
+        print("5.(Cerrar sesion): ")
+
+        opcion=int(input("Seleccione una opcion: ").strip())
+        # comprueba la opcion que ha elegido el usuario
+        if(opcion==1):
+            s.send("L".encode())
+            print("Listando Competiciones...")
+            competiciones=s.recv(1024).decode()
+            print(competiciones)
+        elif(opcion==2):
+            # envia la opcion
+            s.send("I".encode())
+            nombre=input("introduce el nombre del grupo: ").strip()
+            competiciones = s.recv(1024).decode()
+            nombre+=";"
+            # concatena con el nombre del grupo el correo del usuario conectado
+            nombre += (correoC+":")
+            num_participantes=0
+            # mientras que no se hayan introducido a todos los integrantes sigue el bucle
+            while(num_participantes<2):
+                correo=input("Introduce el correo de los demas participantes").strip()
+                # comprueba que el email introducido sea valido
+                if(comprobarEmail(correo)):
+                    # si es el ultimo correo termina en ;
+                    if(num_participantes==1):
+                        nombre+=(correo+";")
+                    # si no termina en :
+                    else:
+                        nombre+=(correo+":")
+                    num_participantes +=1
+                else:
+                    print("Correo no valido")
+            while(True):
+                cont=0
+                for linea in competiciones:
+                    print(cont+" = "+linea)
+                    cont +=1
+                inscribir=int(input("Elige una opcion: ").strip())
+                if(inscribir>=len(competiciones) or inscribir < 0):
+                    print("Dicha competicion no existe")
+                else:
+                    nombreComp=linea.split(";")[0]
+                    nombre+=nombreComp+";"
+                    break
+            s.send(nombre.encode())
+            print("enviando datos...")
+            print(nombre)
+            # envia la informacion y espera respuesta
+            s.send(nombre.encode())
+            # divide la respuesta
+            respuesta=s.recv(1024).decode().split(";")
+            tipo=respuesta[0]
+            cadena=respuesta[1]
+            # mira si se ha podido realizar la opcion o no, e informa de ello
+            if (tipo == 'A'):
+                print (cadena)
+            else:
+                print (cadena)
+        elif(opcion==3):
+            s.send("M".encode())
+            print("Cerrando Sesion...")
+        elif(opcion==4):
+            s.send("E".encode())
+            print("Cerrando Sesion...")
+        elif(opcion==5):
+            s.send("C".encode())
+            print("Cerrando Sesion...")
+            break
+        else:
+            print("Opcion no valida")
+
+
 correoC=""
 
 while(not validacion):
@@ -33,6 +112,7 @@ while(not validacion):
                 validacion=True
                 correoC = correo
                 print(cadena)
+                menu(correoC)
                 break
             else:
                 print(cadena)
@@ -44,6 +124,9 @@ while(not validacion):
         if (comprobarEmail(correo)):
             s.send(("R;"+correo).encode())
             respuesta=s.recv(1024).decode()
+            dato=respuesta.split(";")
+            tipo=dato[0]
+            cadena=dato[1]
             # si la respuesta es afirmativa, vuelve a mostrar el menu por si quiere registrar a otro usuario o iniciar sesion
             if(tipo=='A'):
                 print(cadena)
@@ -60,66 +143,7 @@ while(not validacion):
     else:
         print("La opcion elegida no es correcta")
 # mientras que el cliente no quiera salir muestra el menu
-while(True):
-    print("1.(Listar competiciones)")
-    print("2.(Inscribir grupo)")
-    print("3.(Mostrar preguntas)")
-    print("4.(Enviar respuesta)")
-    print("5.(Cerrar sesion): ")
 
-    opcion=int(input("Seleccione una opcion: ").strip())
-    # comprueba la opcion que ha elegido el usuario
-    if(opcion==1):
-        s.send("L".encode())
-        print("Listando Competiciones...")
-        competiciones=s.recv(1024).decode()
-    elif(opcion==2):
-        # envia la opcion
-        s.send("I".encode())
-        nombre=input("introduce el nombre del grupo: ").strip()
-        nombre+=";"
-        # concatena con el nombre del grupo el correo del usuario conectado
-        nombre += (correoC+":")
-        num_participantes=0
-        # mientras que no se hayan introducido a todos los integrantes sigue el bucle
-        while(num_participantes<2):
-            correo=input("Introduce el correo de los demas participantes").strip()
-            # comprueba que el email introducido sea valido
-            if(comprobarEmail(correo)):
-                # si es el ultimo correo termina en ;
-                if(num_participantes==1):
-                    nombre+=(correo+";")
-                # si no termina en :
-                else:
-                    nombre+=(correo+":")
-                num_participantes +=1
-            else:
-                print("Correo no valido")
-        print("enviando grupo...")
-        print(nombre)
-        # envia la informacion y espera respuesta
-        s.send(nombre.encode())
-        # divide la respuesta
-        respuesta=s.recv(1024).decode().split(";")
-        tipo=respuesta[0]
-        cadena=respuesta[1]
-        # mira si se ha podido realizar la opcion o no, e informa de ello
-        if (tipo == 'A'):
-            print (cadena)
-        else:
-            print (cadena)
-
-    elif(opcion==3):
-        s.send("M".encode())
-        print("Cerrando Sesion...")
-    elif(opcion==4):
-        s.send("E".encode())
-        print("Cerrando Sesion...")
-    elif(opcion==5):
-        s.send("C".encode())
-        print("Cerrando Sesion...")
-    else:
-        print("Opcion no valida")
 
 
 
