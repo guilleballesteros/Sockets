@@ -43,7 +43,7 @@ class Cliente(Thread):
                     f.close()
                     nombreG=grupo.split(";")[0]
                     posicion=int(grupo.split(";")[2])
-                    if(inscribir_competicion(nombreG,competiciones,posicion)):
+                    if(inscribir_competicion(nombreG,posicion)):
                         self.socket.send("Grupo inscrito".encode())
                     else:
                         self.socket.send("No se ha podido inscribir al grupo".encode())
@@ -53,7 +53,7 @@ class Cliente(Thread):
                     self.socket.send("A;Ya existe un grupo con ese nombre procedemos a inscribir a la competicion".encode())
                     nombreG=grupo.split(";")[0]
                     posicion=int(grupo.split(";")[2])
-                    if(inscribir_competicion(nombreG,competiciones,posicion)):
+                    if(inscribir_competicion(nombreG,posicion)):
                         self.socket.send("Grupo inscrito".encode())
                     else:
                         self.socket.send("No se ha podido inscribir al grupo".encode())
@@ -116,37 +116,37 @@ def comprobacionGrupo(dato):
     f.close()
     return comp
 
-def inscribir_competicion(grupo, competiciones, posicion):
+def inscribir_competicion(grupo, posicion):
     comp=False
-    f=open("ficheros/Competiciones.txt",'w')
+    competiciones = getComp()
     competicion=competiciones[posicion]
     competicionF = competicion.split(";")
     fechaI=competicionF[1]
     fechaF=competicionF[3]
-    print(fechaI+" "+fechaF )
     if(comprobar_fecha(fechaI, fechaF)):
-        comp=True
-        print(competicion)
-        competicion = competicion.split(";")
-        print(competicion)
-        competicion[5]+=(grupo+":")
-        # competicion.remove("\n")
-        final=""
-        cont=0
-        for a in competicion:
-            if (cont==(len(competicion)-1)):
-                final+=(a)
-            else:
-                final+=(a+";")
-            cont+=1
-        competiciones[posicion]=final
-        for linea in competiciones:
-            print(linea)
-            f.write(linea)
-    else:
-        for linea in competiciones:
-            f.write(linea)
-    f.close()
+        # comp=True
+        linea=competiciones[posicion]
+        grupos=(linea.split(";")[5].split(":"))
+        if(grupo not in grupos):
+            comp=True
+            f=open("ficheros/Competiciones.txt",'w')
+            competicion = competicion.split(";")
+            competicion[5]+=(grupo+":")
+            # competicion.remove("\n")
+            final=""
+            cont=0
+            for a in competicion:
+                if (cont==(len(competicion)-1)):
+                    final+=(a)
+                else:
+                    final+=(a+";")
+                cont+=1
+            competiciones[posicion]=final
+            for linea in competiciones:
+                f.write(linea)
+            f.close()
+        else:
+            comp=False
     return comp
 
 
@@ -215,7 +215,6 @@ def getComp():
     for linea in f:
         competiciones.append(linea)
     f.close()
-    print (competiciones)
     return competiciones
 
 
