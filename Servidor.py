@@ -65,10 +65,37 @@ class Cliente(Thread):
                 nombre=self.socket.recv(1024).decode()
                 linea =listarComp(getComp(),nombre)
                 self.socket.send(linea.encode())
-            elif(opcion=='M'):
-                print("")
-            elif(opcion=='E'):
-                print("")
+            elif(opcion=='M'): # Mandar preguntas 
+                entrada = comprobar_fecha2("25/11/20","27/11/20")
+                self.socket.send(entrada.encode())
+                if(entrada=="entra"):
+                    mandar=""
+                    for x in range(10):
+                        if(x<10):
+                            mandar= mandar+"Pregunta "+str(x+1)+" "+pregunta[x]+"\n"
+                    self.socket.send(mandar.encode())    
+           elif(opcion=='E'): #Responder una pregunta
+                 global res
+                 self.socket.send("Que pregunta quieres responder? ".encode())
+                 y = int(self.socket.recv(1024).decode())-1
+                 if( pregunta[y]=="Respondida"):
+                    self.socket.send("FF;F".encode())
+                 else:
+                    res.append(respuestas[y*3])
+                    res.append(respuestas[y*3+1])
+                    res.append(respuestas[y*3+2])
+                    random.shuffle(res)
+                    pre ="Pregunta "+str(y+1)+" "+pregunta[y]
+                    self.socket.send(pre.encode())
+                    opciones=""
+                    for z in range(3):
+                        opciones=opciones+(str(z+1)+". "+res[z]+"\n")
+                    self.socket.send(opciones.encode())
+                    eleccion = int(self.socket.recv(1024).decode())  #eval(input("Eligie la respuesta correcta: 1, 2 o 3"))
+                    # if(int(eleccion)<=3):
+                    puntuacion(y,res[int(eleccion-1)])
+                    res.clear()
+                    pregunta[y]="Respondida"
             elif(opcion=='C'):
                 print("Cliente ha cerrado sesion")
                 self.socket.close()
@@ -184,6 +211,23 @@ def comprobar_hora(horaini, horafin):
             return False
     else:
         return False
+    
+   def comprobar_fecha2(fechaini,fechafin):
+    
+    now = datetime.now() 
+    ahora = now.strftime("%d/%m/%y")
+
+    fechaActual = time.strptime(ahora,"%d/%m/%y")
+    fechaInicio = time.strptime(fechaini,"%d/%m/%y")
+    fechaFinal = time.strptime(fechafin,"%d/%m/%y")
+
+    if(fechaInicio <= fechaActual):
+        if(fechaActual <= fechaFinal):
+            return "entra"
+        else:
+            return "no"
+    else:
+        return "no"
 
 
         
