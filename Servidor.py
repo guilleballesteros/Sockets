@@ -138,32 +138,40 @@ def comprobacionGrupo(dato):
     f.close()
     return comp
 
-def comprobar_fecha(fechacomp):
+# Comprueba que la fecha de hoy este entre dos fechas pasadas
+def comprobar_fecha(fechaini,fechafin):
     
     now = datetime.now() 
     ahora = now.strftime("%d/%m/%y")
-    fecha = time.strptime(ahora,"%d/%m/%y")
-    fecha2 = time.strptime(fechacomp,"%d/%m/%y")
-    print("hoy es "+ahora)
-    if(fecha == fecha2):
-        print("entra")
-    if(fecha < fecha2):
-        print("ya se ha pasado la fecha")
-    if(fecha > fecha2):
-        print("no ha llegado aun la fecha")
 
+    fechaActual = time.strptime(ahora,"%d/%m/%y")
+    fechaInicio = time.strptime(fechaini,"%d/%m/%y")
+    fechaFinal = time.strptime(fechafin,"%d/%m/%y")
 
-def comprobar_hora(horacomp):
+    if(fechaInicio <= fechaActual):
+        if(fechaActual <= fechaFinal):
+            return True
+        else:
+            return False
+    else:
+        return False
+        
+
+def comprobar_hora(horaini, horafin):
     
     now = datetime.now() 
     ahora = now.strftime("%H:%M:%S")
-    hora = time.strptime(ahora,"%H:%M:%S")
-    horaLimite = time.strptime(horacomp,"%H:%M:%S")
-    print("ahora es "+ahora)
-    if(hora > horaLimite):
-        print("entra")
-    if(hora < horaLimite):
-        print("hora finalizada")
+    horaActual = time.strptime(ahora,"%H:%M:%S")
+    horaInicio = time.strptime(horaini,"%H:%M:%S")
+    horaFinal = time.strptime(horafin,"%H:%M:%S")
+
+    if(horaInicio <= horaActual):
+        if(horaActual <= horaFinal):
+            return True
+        else:
+            return False
+    else:
+        return False
 
         
 # comprueba si hay algun usuario con el mismo nombre en el fichero
